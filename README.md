@@ -1,6 +1,6 @@
 #  BigCommerce solved problems
 
-## [Test working version](https://spartan-store.mybigcommerce.com/)
+## [Test working version: https://spartan-store.mybigcommerce.com/](https://spartan-store.mybigcommerce.com/)
 
 ### Hover effect:
 [file base.html](https://github.com/Spartak-Belov-Floresku/bigcommerce/blob/main/templates/layout/base.html)
