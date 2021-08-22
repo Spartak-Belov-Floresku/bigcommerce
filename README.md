@@ -1,13 +1,13 @@
 # Special Item hover effect
 
-### Hover effect
+### Hover effect:
 [file base.html](https://github.com/Spartak-Belov-Floresku/bigcommerce/blob/main/templates/layout/base.html)
 
 - The code was added on lines 41 through 243.
 - Used AJAX to fetch data from the server for a specific product.
 - If the product has multiple images, the hover effect is activated, which will show the second image on mouse hover.
 
-### Adding the add and delete buttons on category page using the storefront API
+### Adding the add and delete buttons on category page using the storefront API:
 [file category.html](https://github.com/Spartak-Belov-Floresku/bigcommerce/blob/main/templates/pages/category.html)
 
 - The code was added on lines 8 through 187 and 250 to 254.
@@ -24,7 +24,7 @@
 - And will remove the delete button from the UI.
 
 
-### Bonus shows some customer details
+### Bonus shows some customer details:
 [file category.html](https://github.com/Spartak-Belov-Floresku/bigcommerce/blob/main/templates/pages/category.html)
 
 - The code was added on lines 216 through 228.
