@@ -87,6 +87,7 @@ export default class ImageGallery {
 
             this.$mainImageNested.css(fallbackStylesIE);
         }
+
     }
 
     checkImage() {

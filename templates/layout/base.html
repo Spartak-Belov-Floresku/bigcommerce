@@ -37,6 +37,225 @@
             });
         </script>
 
+
+        <!---------------------------------------------------------------------hover effect for images----------------------------------------------------------------------------------->
+        
+        <script src="https://unpkg.com/jquery"></script>
+        <script src="https://unpkg.com/axios/dist/axios.js"></script>
+
+        <script type="text/javascript">
+
+            $().ready(() => {
+
+                // getting all tags that hold images
+                const lis = $('.product');
+                const divs = $('.productCarousel-slide');
+                
+                // creating to variables that will used to replace image forward and back
+                let currentImgTag = false ;
+                let nextSrcImg = false;
+                let switchBackSrc = false;
+
+                //ajax sends request to retrieve data from server for the product
+                const getData = async (url) => {
+
+                    try{
+
+                        let {data} = await axios.get(url);
+                        return data;
+
+                    }catch(err){
+
+                        console.log(err);
+
+                    }
+
+                }
+
+                // function processes data that was received from ajax request and extracted the second image thumbnail for the product
+                const processData = (data) =>{
+
+                    const DOM = document.createElement('div');
+                    DOM.innerHTML = data;
+
+                    let lis = DOM.querySelectorAll('.productView-thumbnail');
+
+                    if(lis.length > 1){
+                        return lis[1];
+                    }
+
+                    return false;
+                }
+
+                // function will activated on hover event to replace the current image
+                const putImg = (cur, next) => {
+
+                    cur.attr('src', next);
+                    cur.attr('srcset', next);
+
+                }
+
+                lis.map(async (i) => {
+
+                    // if li element has tag a with href attribute that pointed to the necessary product, it will execute block of the code
+                    if($(lis[i]).find('a').attr('href').includes('special-item')){
+
+                        // send AJAX request
+                        let data = await getData($(lis[i]).find('a').attr('href'));
+
+                        //extracted the second li element for the product
+                        let li = processData(data);
+
+                        // if li is true, execute block of code
+                        if(li){
+
+                            //getting the current img element from li block
+                            currentImgTag = $(lis[i]).find('img');
+
+                            //getting references to the src of the second image
+                            nextSrcImg = $(li).find('a').attr('href');
+
+
+                        }
+                        
+
+                    }
+
+                });
+
+                divs.map(async (i) => {
+
+                    // if li element has tag a with href attribute that pointed to the necessary product, it will execute block of the code
+                    if($(divs[i]).find('a').attr('href').includes('special-item')){
+
+                        // send AJAX request
+                        let data = await getData($(divs[i]).find('a').attr('href'));
+
+                        //extracted the second li element for the product
+                        let li = processData(data);
+
+                        // if li is true, execute block of code
+                        if(li){
+
+                            //getting the current img element from li block
+                            currentImgTag = $(divs[i]).find('img');
+
+                            //getting references to the src of the second image
+                            nextSrcImg = $(li).find('a').attr('href');
+
+
+                        }
+            
+
+                    }
+
+                });
+
+
+
+                // assigning hover effect to the divs elements the home page
+                divs.hover(
+
+                    (elem) => {
+
+                        if(currentImgTag){
+                            // make sure that the target div is the div of special item
+                            if(currentImgTag.attr("alt") === $(elem.currentTarget).find('img').attr("alt")){
+
+                                if(currentImgTag && nextSrcImg){
+
+                                    //the variable is going to hold current references of the image
+                                    switchBackSrc = currentImgTag.attr('src');
+
+                                    //here will run throw all lis elements to find special product that is related to the li element
+                                    putImg(currentImgTag, nextSrcImg);
+                                }
+
+                            }
+                        }
+
+                    },
+                    (elem) => {
+
+                        if(currentImgTag){
+                            // make sure that the target div is the div of special item
+                            if(currentImgTag.attr("alt") === $(elem.currentTarget).find('img').attr("alt")){
+
+                                // check if currentImg was replaced by the second image
+                                if(currentImgTag && switchBackSrc){
+
+                                    // var will hold referents to the second image to replace not using AJAX request second time
+                                    nextSrcImg = currentImgTag.attr('src');
+
+                                    // replace the second image back with the first
+                                    putImg(currentImgTag, switchBackSrc);
+
+                                }
+
+                            }
+                        }
+                    }
+
+                );
+
+                // assigning hove event to the lis elements the category page
+                lis.hover(
+                    (elem) => {
+
+                        if(currentImgTag){
+                            // make sure that the target li is the li of special item
+                            if(currentImgTag.attr("alt") === $(elem.currentTarget).find('img').attr("alt")){    
+                                if(currentImgTag && nextSrcImg){
+
+                                    //the variable is going to hold current references of the image
+                                    switchBackSrc = currentImgTag.attr('src');
+
+                                    //here will run throw all lis elements to find special product that is related to the li element
+                                    putImg(currentImgTag, nextSrcImg);
+                                }
+                            }
+                        }
+
+                    },
+                    (elem) => {
+
+                        if(currentImgTag){
+                            // make sure that the target li is the li of special item
+                            if(currentImgTag.attr("alt") === $(elem.currentTarget).find('img').attr("alt")){
+                                // check if currentImg was replaced by the second image
+                                if(currentImgTag && switchBackSrc){
+
+                                    // var will hold referents to the second image to replace not using AJAX request second time
+                                    nextSrcImg = currentImgTag.attr('src');
+
+                                    // replace the second image back with the first
+                                    putImg(currentImgTag, switchBackSrc);
+
+                                }
+                            }
+                        }
+                    }
+                );
+            });
+
+        </script>
+
+        <!--------------------------------------------------------------------stilling user details on the category page------------------------------------------------------------>
+        <style>
+            #user_details{
+                margin-bottom:1em;
+            }
+            #user_details>p{
+                margin-bottom:2px !important;
+                font-style: inherit;
+            }
+            #user_details span{
+                font-weight:900;
+            }      
+        </style>
+
+        <!-------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+
         {{ getFontsCollection }}
         {{{stylesheet '/assets/css/theme.css'}}}
 

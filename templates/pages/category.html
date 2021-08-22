@@ -4,6 +4,189 @@ category:
     products:
         limit: {{theme_settings.categorypage_products_per_page}}
 ---
+
+<!-------------------------------------------------------------------methods to operate with cart------------------------------------------------------------------->
+
+<script src="https://unpkg.com/jquery"></script>
+<script src="https://unpkg.com/axios/dist/axios.js"></script>
+
+<script type="text/javascript">
+    $().ready(() => {
+
+        // creating references to button and to the items
+        const $addAllCart = document.querySelector('#add_all_cart');
+        const $addCartLinks = document.querySelectorAll('[data-button-type="add-cart"]');
+
+        // working cart id 
+        let cartId = false;
+
+
+        //method will run to check if user has a cart
+        const getCart = async () => {
+
+            let {data} = await axios.get(`/api/storefront/carts`);
+
+            if(data.length){
+
+                cartId = data[0].id
+                notifyUser(data);
+                createDeleteButton();
+
+            }
+
+        }
+
+        /**
+         * method runs notification for user
+         * update quantities items on the UI
+         * */
+        const notifyUser = (data) => {
+
+            let cartQuantity = $('.cart-quantity');
+            cartQuantity.addClass('countPill--positive');
+            
+            let totalItems = 0;
+
+            data[0].lineItems.physicalItems.forEach(item => {
+                totalItems += item.quantity
+            });
+
+            cartQuantity.text(totalItems);
+
+        }
+
+        /**
+         * if the cart has items the method will create the delete button
+         * also assignees an event to trigger method deleteCart()to delete all items from the current cart for the future use 
+        */
+        const createDeleteButton = () => {
+
+            let btn = $('#delete_cart');
+
+            if(!btn.length && cartId){
+
+                let div = $('#cartButtons');
+                div.append('<button type="button" id="delete_cart" class="button button--small form-field" style="margin-left:0">Remove All Items</button></div>');
+
+                div.delegate( "button", "click", event => {
+                    let elm = event.currentTarget;
+                    deleteCart(elm);
+                });
+
+            }
+
+        }
+
+        /**
+         * assignees click event to the add button, 
+         * that will used by user to create cart or add items to the cart
+        */
+        $addAllCart.addEventListener("click", () => { 
+
+            let cartItems = {"lineItems": []}
+            let interval = 0
+
+            $addCartLinks.forEach( a => {
+
+                let url = $(a).attr("href");
+                let i = url.lastIndexOf("=")+1;
+
+                let product = {"quantity": 1, "productId": url.slice(i)}
+
+                cartItems.lineItems.push(product)
+                
+            });
+
+            if(!cartId){
+
+                createCart(`/api/storefront/carts`, cartItems)
+                .then(data => {
+                    cartId = data.id;
+                    $('.cart-quantity').trigger('click');
+                })
+                .catch(error => console.error(error));
+
+            }else{
+
+                addCartItem(`/api/storefront/carts/`, cartId, cartItems);
+
+            }
+            
+        });
+
+
+        /**
+         * methods runs only ones if user does not have a cart and puts items into user cart
+         * also calls getCart method to update UI
+        */
+        const createCart = (url, cartItems) => {
+            
+                return fetch(url, {
+                    method: "POST",
+                    credentials: "same-origin",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify(cartItems),
+                })
+                .then(response => {
+
+                    getCart();
+                    return response.json();
+
+                });
+            
+        };
+
+        /**
+         * method runs every time when use wants to add items to the cart,
+         * also calls getCart method to update UI
+        */
+        const addCartItem = (url, cartId, cartItems) => {
+                fetch(url + cartId + '/items', {
+                    method: "POST",
+                    credentials: "same-origin",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify(cartItems),
+                })
+                .then( () => {
+                    $('.cart-quantity').trigger('click');
+                    getCart();
+                })
+                .catch(error => console.error(error));
+        };
+
+        /**
+         * method runs when user wants to delete cart,
+         * also calls update UI and removes delete button from UI
+        */
+        const deleteCart = async (elm) =>{
+
+            if(elm.id == "delete_cart"){
+                fetch(`/api/storefront/carts/${cartId}`, {
+                    method: "DELETE",
+                })
+                .then(response => {
+
+                    if(response.ok){
+                        $('#delete_cart').remove();
+                        $('.cart-quantity').removeClass( 'countPill--positive');
+                        cartId = false;
+                    }
+
+                })
+                .catch(error => console.error(error));
+            }
+
+        }
+
+        // method runs to check if user has a cart, updates UI
+        getCart();
+
+    });
+</script>
+
+<!---------------------------------------------------------------------------------------------------------------------------------------------------------------->
+
+
 {{inject "categoryProductsPerPage" theme_settings.categorypage_products_per_page}}
 {{inject "categoryId" category.id}}
 {{#partial "head"}}
@@ -14,7 +197,6 @@ category:
         <link rel="next" href="{{pagination.category.next}}">
     {{/if}}
 {{/partial}}
-
 {{#partial "page"}}
 
 {{> components/common/breadcrumbs breadcrumbs=breadcrumbs}}
@@ -30,6 +212,21 @@ category:
     <h1 class="page-heading">{{category.name}}</h1>
     {{{region name="category_below_header"}}}
 {{/unless}}
+
+<!----------------------------show current user's details-------------------------------------------->
+{{#if customer }}
+    <div id="user_details">
+        <p>Hello <span>{{customer.shipping_address.first_name}}</span></p>
+        {{#if customer.email}}
+            <p>Email: <span>{{customer.email}}</span></p>
+        {{/if}}
+        {{#if customer.shipping_address.phone}}
+            <p>Phone: <span>{{customer.shipping_address.phone}}</span></p>
+        {{/if}}
+    </div>
+{{/if}}
+<!-------------------------------------------------------------------------------------------------->
+
 {{{category.description}}}
 <div class="page">
     {{#if category.faceted_search_enabled}}
@@ -47,8 +244,15 @@ category:
             </aside>
         {{/if}}
     {{/if}}
-
+    
     <div class="page-content" id="product-listing-container">
+
+<!---------------------------------------------buttons to operate with products--------------------------------------------------------------------------------------->
+
+    <div id="cartButtons"><button type="button" id="add_all_cart" class="button button--small form-field">Add All To Cart</button></div>
+
+<!-------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+
         {{> components/category/product-listing}}
         {{{region name="category_below_content"}}}
     </div>
@@ -56,3 +260,5 @@ category:
 
 {{/partial}}
 {{> layout/base}}
+
+
