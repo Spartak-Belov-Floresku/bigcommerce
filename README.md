@@ -1,6 +1,7 @@
 # Special Item hover effect
 
-###[file base.html](bigcommerce/templates/layout/base.html)
+### Hover effect
+[file base.html](bigcommerce/templates/layout/base.html)
     - The code was added on lines 41 through 243.
     - Used AJAX to fetch data from the server for a specific product.
     - If the product has multiple images, the hover effect is activated, which will show the second image on mouse hover.
