@@ -1,4 +1,4 @@
-# Special Item hover effect
+#  BigCommerce solved problems
 
 ### Hover effect:
 [file base.html](https://github.com/Spartak-Belov-Floresku/bigcommerce/blob/main/templates/layout/base.html)
